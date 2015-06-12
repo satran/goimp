@@ -16,10 +16,11 @@ import (
 
 var (
 	goPathPrefix string
-	logE         = log.New(os.Stderr, "", 0)
 )
 
 func init() {
+	log.SetFlags(0)
+	log.SetOutput(os.Stderr)
 	gopath := os.Getenv("GOPATH")
 	if gopath != "" {
 		goPathPrefix = filepath.Join(gopath, "src")
@@ -43,7 +44,7 @@ func main() {
 
 	imports, err := getImports(*directory, *recursive, nil)
 	if err != nil {
-		logE.Fatal(err)
+		log.Fatal(err)
 	}
 	for _, imp := range imports {
 		if !*commit {
@@ -52,7 +53,7 @@ func main() {
 		}
 		commit, err := getCommit(imp)
 		if err != nil {
-			logE.Printf("couldn't get commit hash for %s\nerr:%s", imp, err)
+			log.Printf("couldn't get commit hash for %s\nerr:%s", imp, err)
 		}
 		fmt.Println(imp, commit)
 	}
@@ -83,7 +84,7 @@ func getImports(dir string, recursive bool, initial *set) ([]string, error) {
 		pathImports, err := getImports(path, recursive, imports)
 		switch err.(type) {
 		case *errPkgNotFound:
-			logE.Print(err)
+			log.Print(err)
 		case nil:
 		default:
 			return nil, err
@@ -115,7 +116,7 @@ func parseDir(directory string) ([]*ast.File, error) {
 		}
 		f, err := parser.ParseFile(fs, name, nil, 0)
 		if err != nil {
-			logE.Printf("ignoring unparsable file %q: %s", name, err)
+			log.Printf("ignoring unparsable file %q: %s", name, err)
 			continue
 		}
 		files = append(files, f)
