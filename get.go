@@ -24,10 +24,10 @@ func get(dir string) {
 		}
 		if exists(filepath.Join(gopathPrefix, imp)) == nil {
 			log.Printf("fetching %s...", imp)
-			err = Fetch(imp, gopathPrefix)
+			err = fetch(imp, gopathPrefix)
 		} else {
 			log.Printf("go get %s...", imp)
-			err = Execute("", "go", "get", "-u", imp)
+			err = execute("", "go", "get", "-u", imp)
 		}
 		if err != nil {
 			log.Printf("%s", err)
@@ -37,7 +37,7 @@ func get(dir string) {
 			continue
 		}
 		log.Printf("checkout to %s...", hash)
-		err = Checkout(imp, gopathPrefix, hash)
+		err = checkout(imp, gopathPrefix, hash)
 		if err != nil {
 			log.Printf("%s", err)
 			continue

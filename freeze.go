@@ -41,7 +41,7 @@ func freeze(dir string, recursive, write, list, hash bool) {
 	for _, imp := range imports {
 		var line string
 		if hash {
-			commit, err := GetCommit(imp, gopathPrefix)
+			commit, err := getCommit(imp, gopathPrefix)
 			if err != nil {
 				log.Printf(
 					"couldn't get commit hash for %s\nerr:%s",
@@ -65,8 +65,8 @@ func freeze(dir string, recursive, write, list, hash bool) {
 	}
 }
 
-func getImports(dir string, recursive bool, initial *Set) ([]string, error) {
-	imports := NewSet()
+func getImports(dir string, recursive bool, initial *set) ([]string, error) {
+	imports := newSet()
 	files, err := parseDir(dir)
 	if err != nil {
 		return nil, err
@@ -134,7 +134,7 @@ func parseDir(directory string) ([]*ast.File, error) {
 }
 
 func getFileImports(file *ast.File) []string {
-	imports := NewSet()
+	imports := newSet()
 	for _, imp := range file.Imports {
 		path := strings.Trim(imp.Path.Value, `"`)
 		if !isStdLib(path) {

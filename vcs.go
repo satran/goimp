@@ -69,9 +69,9 @@ func vcsForDir(dir, gopath string) (vcs *vcsCmd, root string, err error) {
 	return nil, "", fmt.Errorf("directory %q is not using a known version control system", origDir)
 }
 
-// GetCommit provides the latest commit hash for a given directory.
+// getCommit provides the latest commit hash for a given directory.
 // If a gopath is provided it limits the search inside the path.
-func GetCommit(dir, gopath string) (string, error) {
+func getCommit(dir, gopath string) (string, error) {
 	dir = filepath.Join(gopath, dir)
 	vcs, root, err := vcsForDir(dir, gopath)
 	if err != nil {
@@ -95,8 +95,8 @@ func GetCommit(dir, gopath string) (string, error) {
 	return strings.Trim(string(output), "\n"), nil
 }
 
-// Checkout resets the head to hash commit for the given directory
-func Checkout(dir, gopath, hash string) error {
+// checkout resets the head to hash commit for the given directory
+func checkout(dir, gopath, hash string) error {
 	dir = filepath.Join(gopath, dir)
 	vcs, root, err := vcsForDir(dir, gopath)
 	if err != nil {
@@ -108,13 +108,13 @@ func Checkout(dir, gopath, hash string) error {
 	args := strings.Split(vcs.checkout, " ")
 	args = append(args, hash)
 	if len(args) == 1 {
-		return Execute(root, args[0])
+		return execute(root, args[0])
 	}
-	return Execute(root, args[0], args[1:]...)
+	return execute(root, args[0], args[1:]...)
 }
 
-// Fetch fetches all branches from remote
-func Fetch(dir, root string) error {
+// fetch fetches all branches from remote
+func fetch(dir, root string) error {
 	dir = filepath.Join(root, dir)
 	vcs, root, err := vcsForDir(dir, root)
 	if err != nil {
@@ -125,14 +125,14 @@ func Fetch(dir, root string) error {
 	}
 	args := strings.Split(vcs.fetch, " ")
 	if len(args) == 1 {
-		return Execute(root, args[0])
+		return execute(root, args[0])
 	}
-	return Execute(root, args[0], args[1:]...)
+	return execute(root, args[0], args[1:]...)
 }
 
-// Execute executes a command in the provided working directory
+// execute executes a command in the provided working directory
 // and returns the stderr as error.
-func Execute(cwd, command string, args ...string) error {
+func execute(cwd, command string, args ...string) error {
 	cmd := exec.Command(command, args...)
 	if cwd != "" {
 		cmd.Dir = cwd
