@@ -23,7 +23,9 @@ func init() {
 	log.SetOutput(os.Stderr)
 	gopath := os.Getenv("GOPATH")
 	if gopath != "" {
-		goPathPrefix = filepath.Join(gopath, "src")
+		splits := strings.Split(gopath, ":")
+		// Use only the first of the gopath
+		goPathPrefix = filepath.Join(splits[0], "src")
 	}
 }
 
