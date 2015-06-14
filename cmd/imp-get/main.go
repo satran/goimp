@@ -2,11 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -18,7 +16,7 @@ var (
 )
 
 func init() {
-	log.SetFlags(log.Lshortfile)
+	log.SetFlags(0)
 	log.SetOutput(os.Stderr)
 	path := os.Getenv("GOPATH")
 	if path == "" {
@@ -40,34 +38,40 @@ func main() {
 
 	deps := strings.Split(strings.Trim(string(content), "\n"), "\n")
 	for _, dep := range deps {
-		err = goGet(dep)
+		splits := strings.Split(dep, " ")
+		imp := splits[0]
+		var hash string
+		if len(splits) > 1 {
+			hash = splits[1]
+		}
+		if exists(filepath.Join(gopathPrefix, imp)) == nil {
+			log.Printf("fetching %s...", imp)
+			err = goimp.Fetch(imp, gopathPrefix)
+		} else {
+			log.Printf("go get %s...", imp)
+			err = goimp.Execute("", "go", "get", "-u", imp)
+		}
 		if err != nil {
-			log.Printf("%s: %s", dep, err)
+			log.Printf("%s", err)
+			continue
+		}
+		if hash == "" {
+			continue
+		}
+		log.Printf("checkout to %s...", hash)
+		err = goimp.Checkout(imp, gopathPrefix, hash)
+		if err != nil {
+			log.Printf("%s", err)
+			continue
 		}
 	}
 }
 
-var (
-	getCmd  = "go"
-	getArgs = "get -u %s"
-)
-
-func goGet(path string) error {
-	splits := strings.Split(path, " ")
-	imp := splits[0]
-	var hash string
-	if len(splits) > 1 {
-		hash = splits[1]
-	}
-	args := strings.Split(fmt.Sprintf(getArgs, imp), " ")
-	cmd := exec.Command(getCmd, args...)
-	output, err := cmd.CombinedOutput()
+func exists(dir string) error {
+	dir = filepath.Clean(dir)
+	_, err := os.Stat(dir)
 	if err != nil {
-		log.Printf("%s", output)
 		return err
-	}
-	if hash != "" {
-		return goimp.Checkout(imp, gopathPrefix, hash)
 	}
 	return nil
 }

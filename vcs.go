@@ -2,6 +2,7 @@ package goimp
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +14,7 @@ type vcsCmd struct {
 	cmd      string
 	commit   string
 	checkout string
+	fetch    string
 }
 
 var vcsList = []*vcsCmd{
@@ -21,12 +23,14 @@ var vcsList = []*vcsCmd{
 		cmd:      "git",
 		commit:   "git rev-parse HEAD",
 		checkout: "git checkout",
+		fetch:    "git fetch",
 	},
 	{
 		name:     "Mercurial",
 		cmd:      "hg",
 		commit:   "hg id -i",
 		checkout: "hg update",
+		fetch:    "hg pull",
 	},
 }
 
@@ -91,6 +95,7 @@ func GetCommit(dir, gopath string) (string, error) {
 	return strings.Trim(string(output), "\n"), nil
 }
 
+// Checkout resets the head to hash commit for the given directory
 func Checkout(dir, gopath, hash string) error {
 	dir = filepath.Join(gopath, dir)
 	vcs, root, err := vcsForDir(dir, gopath)
@@ -102,16 +107,51 @@ func Checkout(dir, gopath, hash string) error {
 	}
 	args := strings.Split(vcs.checkout, " ")
 	args = append(args, hash)
-	var cmd *exec.Cmd
-	if len(args) > 1 {
-		cmd = exec.Command(args[0], args[1:]...)
-	} else {
-		cmd = exec.Command(args[0])
+	if len(args) == 1 {
+		return Execute(root, args[0])
 	}
-	cmd.Dir = root
-	output, err := cmd.CombinedOutput()
+	return Execute(root, args[0], args[1:]...)
+}
+
+// Fetch fetches all branches from remote
+func Fetch(dir, root string) error {
+	dir = filepath.Join(root, dir)
+	vcs, root, err := vcsForDir(dir, root)
 	if err != nil {
-		return fmt.Errorf("%s\n%s", output, err)
+		return err
+	}
+	if vcs.fetch == "" {
+		return fmt.Errorf("%s is not yet supported", vcs.name)
+	}
+	args := strings.Split(vcs.fetch, " ")
+	if len(args) == 1 {
+		return Execute(root, args[0])
+	}
+	return Execute(root, args[0], args[1:]...)
+}
+
+// Execute executes a command in the provided working directory
+// and returns the stderr as error.
+func Execute(cwd, command string, args ...string) error {
+	cmd := exec.Command(command, args...)
+	if cwd != "" {
+		cmd.Dir = cwd
+	}
+	errpipe, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+	errout, err := ioutil.ReadAll(errpipe)
+	if err != nil {
+		return err
+	}
+	err = cmd.Wait()
+	if err != nil {
+		return fmt.Errorf("%s", errout)
 	}
 	return nil
 }
