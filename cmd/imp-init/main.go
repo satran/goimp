@@ -16,6 +16,11 @@ const (
 
 var source = `export GOPATH=%s:$GOPATH`
 
+func init() {
+	log.SetFlags(0)
+	log.SetOutput(os.Stderr)
+}
+
 func main() {
 	repo := flag.String("repo", ".", "directory containing source files")
 	vendor := flag.String("vendor", "", "directory to store the vendor repositories. (default: repo/.vendor)")
