@@ -43,9 +43,15 @@ func (e *errPkgNotFound) Error() string {
 func main() {
 	recursive := flag.Bool("r", false, "finds imports recursively")
 	directory := flag.String("dir", ".", "package directory for which the imports must be found")
-	commit := flag.Bool("hash", false, "whether to return the commit hash")
+	commit := flag.Bool("hash", false, "whether to write the commit hash")
+	output := flag.String("out", "deps", "write output to file")
 	flag.Parse()
 
+	outFile, err := os.OpenFile(filepath.Join(*directory, *output),
+		os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 	imports, err := getImports(*directory, *recursive, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -59,7 +65,10 @@ func main() {
 		if err != nil {
 			log.Printf("couldn't get commit hash for %s\nerr:%s", imp, err)
 		}
-		fmt.Println(imp, commit)
+		_, err = outFile.WriteString(fmt.Sprintf("%s %s\n", imp, commit))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
