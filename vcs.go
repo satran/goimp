@@ -1,4 +1,4 @@
-package goimp
+package main
 
 import (
 	"fmt"

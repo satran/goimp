@@ -1,4 +1,4 @@
-package goimp
+package main
 
 // Set provides a store of string, without any particular order,
 // and no repeated values
