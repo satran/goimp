@@ -1,11 +1,15 @@
 package main
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/satran/goimp"
+)
 
 var isStdLib func(path string) bool
 
 func init() {
-	builtins := newSet()
+	builtins := goimp.NewSet()
 	for _, path := range []string{
 		"archive", "bufio", "builtin", "bytes", "compress", "container",
 		"crypto", "database", "debug", "encoding", "errors", "expvar",

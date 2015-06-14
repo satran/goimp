@@ -1,4 +1,4 @@
-package main
+package goimp
 
 import (
 	"fmt"
@@ -32,10 +32,10 @@ var vcsList = []*vcsCmd{
 // On return, root is the import path
 // corresponding to the root of the repository
 // (thus root is a prefix of importPath).
-func vcsForDir(dir string) (vcs *vcsCmd, root string, err error) {
+func vcsForDir(dir, gopath string) (vcs *vcsCmd, root string, err error) {
 	// Clean and double-check that dir is in (a subdirectory of) srcRoot.
 	dir = filepath.Clean(dir)
-	srcRoot := filepath.Clean(goPathPrefix)
+	srcRoot := filepath.Clean(gopath)
 	if len(dir) <= len(srcRoot) || dir[len(srcRoot)] != filepath.Separator {
 		return nil, "", fmt.Errorf(
 			"directory %q is outside source root %q", dir, srcRoot)
@@ -62,8 +62,10 @@ func vcsForDir(dir string) (vcs *vcsCmd, root string, err error) {
 	return nil, "", fmt.Errorf("directory %q is not using a known version control system", origDir)
 }
 
-func getCommit(imp string) (string, error) {
-	vcs, root, err := vcsForDir(filepath.Join(goPathPrefix, imp))
+// GetCommit provides the latest commit hash for a given directory.
+// If a gopath is provided it limits the search inside the path.
+func GetCommit(dir, gopath string) (string, error) {
+	vcs, root, err := vcsForDir(dir, gopath)
 	if err != nil {
 		return "", err
 	}

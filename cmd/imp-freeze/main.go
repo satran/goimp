@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/satran/goimp"
 )
 
 var (
@@ -53,7 +55,7 @@ func main() {
 			fmt.Println(imp)
 			continue
 		}
-		commit, err := getCommit(imp)
+		commit, err := goimp.GetCommit(imp, goPathPrefix)
 		if err != nil {
 			log.Printf("couldn't get commit hash for %s\nerr:%s", imp, err)
 		}
@@ -61,8 +63,8 @@ func main() {
 	}
 }
 
-func getImports(dir string, recursive bool, initial *set) ([]string, error) {
-	imports := newSet()
+func getImports(dir string, recursive bool, initial *goimp.Set) ([]string, error) {
+	imports := goimp.NewSet()
 	files, err := parseDir(dir)
 	if err != nil {
 		return nil, err
@@ -130,7 +132,7 @@ func parseDir(directory string) ([]*ast.File, error) {
 }
 
 func getFileImports(file *ast.File) []string {
-	imports := newSet()
+	imports := goimp.NewSet()
 	for _, imp := range file.Imports {
 		path := strings.Trim(imp.Path.Value, `"`)
 		if !isStdLib(path) {
