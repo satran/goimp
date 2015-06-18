@@ -8,12 +8,9 @@ import (
 	"strings"
 )
 
-const (
-	depsFile = "deps"
-)
-
 var (
 	gopathPrefix string
+	depsFile     string
 )
 
 func init() {
@@ -31,9 +28,10 @@ func main() {
 	debug := flag.Bool("debug", false, "error logs are prefixed with file name")
 	write := flag.Bool("w", false, "writes dependency to deps file")
 	list := flag.Bool("l", false, "lists dependency to stdout")
-	hash := flag.Bool("hash", false, "adds commit hash when writing or listing")
+	hash := flag.Bool("hash", true, "adds commit hash when writing or listing")
 	recursive := flag.Bool("r", false, "finds imports recursively")
 	dir := flag.String("dir", ".", "project source directory")
+	flag.StringVar(&depsFile, "deps", "Godeps", "the dependency file")
 	flag.Parse()
 	if *debug {
 		log.SetFlags(log.Lshortfile)
