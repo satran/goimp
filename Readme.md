@@ -5,8 +5,9 @@ A very simple dependency manager for golang.
 ```
 Usage goimp:
   -debug=false: error logs are prefixed with file name
+  -deps="Godeps": the dependency file
   -dir=".": project source directory
-  -hash=false: adds commit hash when writing or listing
+  -hash=true: adds commit hash when writing or listing
   -l=false: lists dependency to stdout
   -r=false: finds imports recursively
   -w=false: writes dependency to deps file
