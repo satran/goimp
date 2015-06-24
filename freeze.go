@@ -34,6 +34,8 @@ func freeze(dir string, recursive, write, list, hash bool) {
 		}
 	}
 
+	pkgGoPath, err := getPkgGoPath(dir)
+
 	imports, err := getImports(dir, recursive, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -52,6 +54,12 @@ func freeze(dir string, recursive, write, list, hash bool) {
 		} else {
 			line = fmt.Sprintf("%s\n", imp)
 		}
+
+		// Ignore the packages own subpackages
+		if strings.HasPrefix(imp, pkgGoPath) {
+			continue
+		}
+
 		if list {
 			fmt.Print(line)
 		}
@@ -63,6 +71,17 @@ func freeze(dir string, recursive, write, list, hash bool) {
 			log.Fatal(err)
 		}
 	}
+}
+
+func getPkgGoPath(dir string) (string, error) {
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return "", err
+	}
+	if gopathPrefix == "" {
+		return "", errors.New("GOPATH must be set for recursive option")
+	}
+	return strings.Trim(strings.TrimLeft(abs, gopathPrefix), "/"), nil
 }
 
 func getImports(dir string, recursive bool, initial *set) ([]string, error) {
