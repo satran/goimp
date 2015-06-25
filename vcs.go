@@ -21,16 +21,23 @@ var vcsList = []*vcsCmd{
 	{
 		name:     "Git",
 		cmd:      "git",
-		commit:   "git rev-parse HEAD",
-		checkout: "git checkout",
-		fetch:    "git fetch",
+		commit:   "rev-parse HEAD",
+		checkout: "checkout",
+		fetch:    "fetch",
 	},
 	{
 		name:     "Mercurial",
 		cmd:      "hg",
-		commit:   "hg id -i",
-		checkout: "hg update",
-		fetch:    "hg pull",
+		commit:   "id -i",
+		checkout: "update",
+		fetch:    "pull",
+	},
+	{
+		name:     "Bazaar",
+		cmd:      "bzr",
+		commit:   "revno",
+		checkout: "revert -r",
+		fetch:    "pull --overwrite",
 	},
 }
 
@@ -81,12 +88,7 @@ func getCommit(dir, gopath string) (string, error) {
 		return "", fmt.Errorf("%s is not yet supported", vcs.name)
 	}
 	args := strings.Split(vcs.commit, " ")
-	var cmd *exec.Cmd
-	if len(args) > 1 {
-		cmd = exec.Command(args[0], args[1:]...)
-	} else {
-		cmd = exec.Command(args[0])
-	}
+	cmd := exec.Command(vcs.cmd, args...)
 	cmd.Dir = root
 	output, err := cmd.Output()
 	if err != nil {
@@ -107,10 +109,7 @@ func checkout(dir, gopath, hash string) error {
 	}
 	args := strings.Split(vcs.checkout, " ")
 	args = append(args, hash)
-	if len(args) == 1 {
-		return execute(root, args[0])
-	}
-	return execute(root, args[0], args[1:]...)
+	return execute(root, vcs.cmd, args...)
 }
 
 // fetch fetches all branches from remote
@@ -124,10 +123,7 @@ func fetch(dir, root string) error {
 		return fmt.Errorf("%s is not yet supported", vcs.name)
 	}
 	args := strings.Split(vcs.fetch, " ")
-	if len(args) == 1 {
-		return execute(root, args[0])
-	}
-	return execute(root, args[0], args[1:]...)
+	return execute(root, vcs.cmd, args...)
 }
 
 // execute executes a command in the provided working directory
