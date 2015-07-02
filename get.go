@@ -27,7 +27,7 @@ func get(dir string) {
 			err = fetch(imp, gopathPrefix)
 		} else {
 			log.Printf("go get %s...", imp)
-			err = execute("", "go", "get", "-u", imp)
+			err = execute("", "go", "get", "-f", "-u", imp)
 		}
 		if err != nil {
 			log.Printf("%s", err)
