@@ -13,7 +13,7 @@ var cmdWrite = &Command{
 
 -r	writes imports recursively, do note that the dependent 
 	repositories should exist
--p	specify the directory of the package, by default it is .
+-p	specify the directory of the package, by default it is "."
 -hash	prints out the commit hash of each repository
 -file	file to write to, defaults to Godeps
 `,

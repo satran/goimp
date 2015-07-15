@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/satran/goimp/vcs"
@@ -35,7 +36,7 @@ var cmdList = &Command{
 
 -r	lists imports recursively, do note that the dependent 
 	repositories should exist
--p	specify the directory of the package, by default it is .
+-p	specify the directory of the package, by default it is "."
 -hash	prints out the commit hash of each repository
 `,
 }
@@ -62,8 +63,10 @@ func list(dir string, recursive, hash bool) []Import {
 		elog.Fatal(err)
 	}
 	imports = purgeSubPackages(*listDir, imports)
+	sorted := sort.StringSlice(imports)
+	sort.Sort(sorted)
 	var ret []Import
-	for _, pkg := range imports {
+	for _, pkg := range sorted {
 		imp := Import{Package: pkg}
 		if !*listHash {
 			ret = append(ret, imp)

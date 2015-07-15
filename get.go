@@ -15,7 +15,7 @@ var cmdGet = &Command{
 	Short:     "gets imports of the package",
 	Long: `gets imports of the package
 
--p	specify the directory of the package, by default it is .
+-p	specify the directory of the package, by default it is "."
 -file	file to get commits from, defaults to Godeps
 -reset	fetches the lastest code in the master branch
 `,
