@@ -26,8 +26,8 @@ func init() {
 var (
 	writeDir       = cmdWrite.Flag.String("p", ".", "path of the go package")
 	writeFile      = cmdWrite.Flag.String("file", "Godeps", "file to write to")
-	writeRecursive = cmdWrite.Flag.Bool("r", false, "recursively write imports")
-	writeHash      = cmdWrite.Flag.Bool("hash", false, "print out the commit hash")
+	writeRecursive = cmdWrite.Flag.Bool("r", true, "recursively write imports")
+	writeHash      = cmdWrite.Flag.Bool("hash", true, "print out the commit hash")
 )
 
 func runWrite(cmd *Command, args []string) {

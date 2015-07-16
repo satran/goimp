@@ -47,8 +47,8 @@ func init() {
 
 var (
 	listDir       = cmdList.Flag.String("p", ".", "path of the go package")
-	listRecursive = cmdList.Flag.Bool("r", false, "recursively list imports")
-	listHash      = cmdList.Flag.Bool("hash", false, "print out the commit hash")
+	listRecursive = cmdList.Flag.Bool("r", true, "recursively list imports")
+	listHash      = cmdList.Flag.Bool("hash", true, "print out the commit hash")
 )
 
 func runList(cmd *Command, args []string) {
@@ -91,8 +91,9 @@ func list(dir string, recursive, hash bool) []Import {
 
 func purgeSubPackages(pkg string, imports []string) []string {
 	var ret []string
+	path := pkgPath(pkg)
 	for _, imp := range imports {
-		if strings.HasPrefix(imp, pkgPath(pkg)) {
+		if strings.HasPrefix(imp, path) {
 			continue
 		}
 		ret = append(ret, imp)
@@ -105,7 +106,7 @@ func pkgPath(dir string) string {
 	if err != nil {
 		elog.Fatal(err)
 	}
-	return strings.Trim(strings.TrimLeft(abs, goPathSrc), "/")
+	return strings.Trim(abs[len(goPathSrc):], "/")
 }
 
 func getPackageImports(dir string, recursive bool, initial *set) ([]string, error) {
