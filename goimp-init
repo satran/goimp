@@ -29,4 +29,4 @@ function cleanup {
     sudo umount -R $TMP
 }
 
-trap "cleanup" EXIT SIGINT SIGTERM SIGKILL
+trap "cleanup" EXIT
