@@ -14,7 +14,7 @@ var (
 )
 
 var (
-	elog = log.New(os.Stderr, "", log.Lshortfile)
+	elog = log.New(os.Stderr, "", 0)
 )
 
 var commands = []*Command{

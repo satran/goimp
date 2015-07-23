@@ -14,6 +14,8 @@ import (
 	"github.com/satran/goimp/vcs"
 )
 
+var ErrNotGoPackage = errors.New("no buildable go files")
+
 type Import struct {
 	Package string
 	Hash    string
@@ -113,6 +115,9 @@ func getPackageImports(dir string, recursive bool, initial *set) ([]string, erro
 	imports := newSet()
 	files, err := parseDir(dir)
 	if err != nil {
+		if err == ErrNotGoPackage {
+			return nil, nil
+		}
 		return nil, err
 	}
 	for _, file := range files {
@@ -172,7 +177,7 @@ func parseDir(directory string) ([]*ast.File, error) {
 		files = append(files, f)
 	}
 	if len(files) == 0 {
-		return nil, fmt.Errorf("%s: no buildable Go files", directory)
+		return nil, ErrNotGoPackage
 	}
 	return files, nil
 }

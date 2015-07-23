@@ -98,14 +98,14 @@ func get(imp Import, done chan struct{}) {
 			}
 			err = v.Checkout(imp.Hash)
 			if err != nil {
-				elog.Print(err)
+				elog.Printf("error checkout out %s: %s", imp.Package, err)
 				return
 			}
 		}
 		return
 	}
 	if err := v.Latest(); err != nil {
-		elog.Println(err)
+		elog.Printf("error trying to set %s to latest: %s", imp.Package, err)
 	}
 }
 
