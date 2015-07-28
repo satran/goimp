@@ -73,7 +73,7 @@ func get(imp Import, done chan struct{}) {
 	}()
 	vcspath := filepath.Join(goPathSrc, imp.Package)
 	if !exists(vcspath) {
-		cmd := exec.Command("go", "get", imp.Package)
+		cmd := exec.Command("go", "get", "-d", imp.Package)
 		cmd.Stderr = os.Stderr
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
