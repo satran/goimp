@@ -11,7 +11,7 @@ import (
 )
 
 var cmdGet = &Command{
-	UsageLine: "get [-file] [-reset]",
+	UsageLine: "get [-file] [-reset] [-p] [package_url commit]",
 	Short:     "gets imports of the package",
 	Long: `gets imports of the package
 
@@ -32,7 +32,24 @@ var (
 )
 
 func runGet(cmd *Command, args []string) {
-	imports := getImportsFromFile(*getDir, *getFile)
+	var imports []Import
+
+	if len(args) > 0 {
+		pkg := args[0]
+		hash := "master"
+		if len(args) == 2 {
+			if *getReset {
+				elog.Fatal("reset argument conflicts when specifying the commit")
+			}
+			hash = args[1]
+		}
+		imports = []Import{
+			{Package: pkg, Hash: hash},
+		}
+	} else {
+		imports = getImportsFromFile(*getDir, *getFile)
+	}
+
 	done := make(chan struct{})
 	for _, imp := range imports {
 		if *getReset {
