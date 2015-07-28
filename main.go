@@ -21,6 +21,7 @@ var commands = []*Command{
 	cmdList,
 	cmdWrite,
 	cmdGet,
+	cmdBind,
 }
 
 func init() {
