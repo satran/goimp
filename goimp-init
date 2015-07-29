@@ -15,7 +15,7 @@ fi
 sudo mount $VENDOR $TMP
 
 echo "setting GOPATH to $TMP"
-PKG=${PWD/#"$GOPATH/"/}
+PKG=${PWD/#"${GOPATH}\/"/}
 PKGPATH=$TMP/$PKG
 sudo mkdir -p $PKGPATH
 sudo chown -R $USER $TMP 
