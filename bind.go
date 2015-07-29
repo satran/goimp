@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"reflect"
 	"time"
 )
@@ -63,12 +62,10 @@ func runBind(cmd *Command, args []string) {
 		for {
 			time.Sleep(time.Second)
 			if checkReadImports() {
-				fmt.Println("getting...")
 				runGet(&Command{}, []string{})
 				break
 			}
 			if checkWriteImports() {
-				fmt.Println("writing...")
 				runWrite(&Command{}, []string{})
 				break
 			}
