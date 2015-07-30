@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"reflect"
 	"time"
 )
@@ -22,9 +23,17 @@ func init() {
 }
 
 var (
-	getBindDir  = cmdBind.Flag.String("p", ".", "path of the go package")
-	getBindFile = cmdBind.Flag.String("file", "Godeps", "file to get to")
+	// Won't this conflict with other flags?
+	getBindDir       = cmdBind.Flag.String("p", ".", "path of the go package")
+	getBindFile      = cmdBind.Flag.String("file", "Godeps", "file to get to")
+	getBindVerbosity = cmdBind.Flag.Bool("v", false, "set verbosity")
 )
+
+func notify(arg string) {
+	if *getBindVerbosity {
+		log.Println(arg)
+	}
+}
 
 func importsToMap(arg []Import) map[string]string {
 	ret := make(map[string]string)
@@ -64,14 +73,17 @@ func runBind(cmd *Command, args []string) {
 		for {
 			time.Sleep(time.Second)
 			if checkReadImports() {
+				notify("Updating dependencies...")
 				runGet(&Command{}, []string{})
 				runWrite(&Command{}, []string{})
 				break
 			}
 			if checkWriteImports() {
+				notify("Updating Godeps file...")
 				runWrite(&Command{}, []string{})
 				break
 			}
 		}
+		notify("Complete")
 	}
 }
