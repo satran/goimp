@@ -22,9 +22,8 @@ func init() {
 }
 
 var (
-	getBindDir   = cmdBind.Flag.String("p", ".", "path of the go package")
-	getBindFile  = cmdBind.Flag.String("file", "Godeps", "file to get to")
-	getBindReset = cmdBind.Flag.Bool("reset", false, "fetches the latest code in the master branch")
+	getBindDir  = cmdBind.Flag.String("p", ".", "path of the go package")
+	getBindFile = cmdBind.Flag.String("file", "Godeps", "file to get to")
 )
 
 func importsToMap(arg []Import) map[string]string {
@@ -36,6 +35,9 @@ func importsToMap(arg []Import) map[string]string {
 }
 
 func runBind(cmd *Command, args []string) {
+	// Write to Godeps automatically
+	runWrite(&Command{}, []string{})
+
 	var readImports map[string]string
 	checkReadImports := func() bool {
 		newImports := importsToMap(getImportsFromFile(*getBindDir, *getBindFile))
@@ -63,6 +65,7 @@ func runBind(cmd *Command, args []string) {
 			time.Sleep(time.Second)
 			if checkReadImports() {
 				runGet(&Command{}, []string{})
+				runWrite(&Command{}, []string{})
 				break
 			}
 			if checkWriteImports() {
