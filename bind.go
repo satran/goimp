@@ -35,6 +35,16 @@ func notify(arg string) {
 	}
 }
 
+func runBindGet() {
+	notify("Updating dependencies...")
+	runGet(&Command{}, []string{})
+}
+
+func runBindWrite() {
+	notify("Updating Godeps file...")
+	runWrite(&Command{}, []string{})
+}
+
 func importsToMap(arg []Import) map[string]string {
 	ret := make(map[string]string)
 	for _, imp := range arg {
@@ -44,8 +54,8 @@ func importsToMap(arg []Import) map[string]string {
 }
 
 func runBind(cmd *Command, args []string) {
-	// Write to Godeps automatically
-	runWrite(&Command{}, []string{})
+	// Update dependencies automatically
+	runBindGet()
 
 	var readImports map[string]string
 	checkReadImports := func() bool {
@@ -73,14 +83,12 @@ func runBind(cmd *Command, args []string) {
 		for {
 			time.Sleep(time.Second)
 			if checkReadImports() {
-				notify("Updating dependencies...")
-				runGet(&Command{}, []string{})
-				runWrite(&Command{}, []string{})
+				runBindGet()
+				runBindWrite()
 				break
 			}
 			if checkWriteImports() {
-				notify("Updating Godeps file...")
-				runWrite(&Command{}, []string{})
+				runBindWrite()
 				break
 			}
 		}
