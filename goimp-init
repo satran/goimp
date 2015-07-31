@@ -21,15 +21,12 @@ sudo mkdir -p $PKGPATH
 sudo chown -R $USER $TMP 
 sudo mount --bind $PWD $PKGPATH
 export GOPATH=$TMP
-export GOIMP_BIND=$(goimp bind)
 cd $PKGPATH
 
 function cleanup {
-    echo "closing bind..."
-    kill "$GOIMP_BIND"
     echo "unmounting..."
     cd $OLD_WD
-    sudo umount -R "$TMP"
+    sudo umount -R $TMP
 }
 
 trap "cleanup" EXIT
