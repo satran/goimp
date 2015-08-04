@@ -88,7 +88,8 @@ func get(imp Import, done chan struct{}) {
 	defer func() {
 		done <- struct{}{}
 	}()
-	vcspath := filepath.Join(goPathSrc, imp.Package)
+	vcspath := filepath.Join(goPathSrc,
+		strings.TrimRight(imp.Package, "/..."))
 	if !exists(vcspath) {
 		cmd := exec.Command("go", "get", "-d", imp.Package)
 		cmd.Stderr = os.Stderr
@@ -103,6 +104,7 @@ func get(imp Import, done chan struct{}) {
 	v, err := vcs.New(vcspath, goPathSrc)
 	if err != nil {
 		elog.Print(err)
+		return
 	}
 	if imp.Hash != "" {
 		err = v.Checkout(imp.Hash)

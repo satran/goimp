@@ -23,6 +23,12 @@ type Import struct {
 	Hash    string
 }
 
+type Imports []Import
+
+func (i Imports) Len() int           { return len(i) }
+func (i Imports) Swap(m, n int)      { i[m], i[n] = i[n], i[m] }
+func (i Imports) Less(m, n int) bool { return i[m].Package < i[n].Package }
+
 type errPkgNotFound struct {
 	string
 }
@@ -70,10 +76,9 @@ func list(dir string, recursive, hash bool) []Import {
 		elog.Fatal(err)
 	}
 	imports = purgeSubPackages(*listDir, imports)
-	sorted := sort.StringSlice(imports)
-	sort.Sort(sorted)
 	var ret []Import
-	for _, pkg := range sorted {
+	roots := make(map[string][]Import)
+	for _, pkg := range imports {
 		imp := Import{Package: pkg}
 		if !*listHash {
 			ret = append(ret, imp)
@@ -82,7 +87,6 @@ func list(dir string, recursive, hash bool) []Import {
 		path := filepath.Join(goPathSrc, pkg)
 		v, err := vcs.New(path, goPathSrc)
 		if err != nil {
-			elog.Println(err)
 			continue
 		}
 		hash, err := v.CommitHash()
@@ -91,8 +95,17 @@ func list(dir string, recursive, hash bool) []Import {
 			continue
 		}
 		imp.Hash = hash
-		ret = append(ret, imp)
+		roots[v.Root] = append(roots[v.Root], imp)
 	}
+	for root, imps := range roots {
+		if len(imps) <= 1 {
+			ret = append(ret, imps...)
+			continue
+		}
+		root = pkgPath(root) + "/..."
+		ret = append(ret, Import{Package: root, Hash: imps[0].Hash})
+	}
+	sort.Sort(Imports(ret))
 	return ret
 }
 
