@@ -73,7 +73,7 @@ func getImportsFromFile(dir, file string) []Import {
 	var ret []Import
 	lines := strings.Split(strings.Trim(string(content), "\n"), "\n")
 	for _, line := range lines {
-		splits := strings.Split(line, " ")
+		splits := strings.Fields(line)
 		pkg := splits[0]
 		var hash string
 		if len(splits) > 1 {
