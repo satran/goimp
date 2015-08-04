@@ -7,9 +7,11 @@ import (
 	"go/parser"
 	"go/token"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/satran/goimp/vcs"
 )
@@ -54,9 +56,12 @@ var (
 )
 
 func runList(cmd *Command, args []string) {
+	w := new(tabwriter.Writer)
+	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 	for _, imp := range list(*listDir, *listRecursive, *listHash) {
-		fmt.Printf("%s %s\n", imp.Package, imp.Hash)
+		fmt.Fprintf(w, "%s\t%s\n", imp.Package, imp.Hash)
 	}
+	w.Flush()
 }
 
 func list(dir string, recursive, hash bool) []Import {
