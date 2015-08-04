@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"text/tabwriter"
 )
 
 var cmdWrite = &Command{
@@ -39,7 +40,10 @@ func runWrite(cmd *Command, args []string) {
 	}
 	defer file.Close()
 
+	w := new(tabwriter.Writer)
+	w.Init(file, 0, 8, 0, '\t', 0)
 	for _, imp := range list(*listDir, *listRecursive, *listHash) {
-		fmt.Fprintf(file, "%s %s\n", imp.Package, imp.Hash)
+		fmt.Fprintf(w, "%s\t%s\n", imp.Package, imp.Hash)
 	}
+	w.Flush()
 }

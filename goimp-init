@@ -1,4 +1,8 @@
 # This file must not be executed rather sourced.
+
+# Remove any trailing slashes
+GOPATH=${GOPATH%/} 
+
 export OLD_WD=$(pwd)
 export OLD_GOPATH=$GOPATH
 
@@ -15,7 +19,7 @@ fi
 sudo mount $VENDOR $TMP
 
 echo "setting GOPATH to $TMP"
-PKG=${PWD/#"${GOPATH}\/"/}
+PKG=${PWD/#"${GOPATH}"/}
 PKGPATH=$TMP/$PKG
 sudo mkdir -p $PKGPATH
 sudo chown -R $USER $TMP 
