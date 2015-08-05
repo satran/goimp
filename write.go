@@ -34,7 +34,7 @@ var (
 func runWrite(cmd *Command, args []string) {
 	file, err := os.OpenFile(
 		filepath.Join(*writeDir, *writeFile),
-		os.O_CREATE|os.O_WRONLY, 0644)
+		os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		elog.Println(err)
 	}
