@@ -30,7 +30,8 @@ cd $PKGPATH
 function cleanup {
     echo "unmounting..."
     cd $OLD_WD
-    sudo umount -R $TMP
+    sudo umount $PKGPATH
+    sudo umount $TMP
 }
 
 trap "cleanup" EXIT
