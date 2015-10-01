@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/satran/goimp/vcs"
 )
@@ -50,16 +51,27 @@ func runGet(cmd *Command, args []string) {
 		imports = getImportsFromFile(*getDir, *getFile)
 	}
 
-	done := make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Add(len(imports))
+	for _, imp := range imports {
+		go func(imp Import) {
+			getDependencies(imp)
+			wg.Done()
+		}(imp)
+	}
+	wg.Wait()
+
+	wg.Add(len(imports))
 	for _, imp := range imports {
 		if *getReset {
 			imp.Hash = ""
 		}
-		go get(imp, done)
+		go func(imp Import) {
+			get(imp)
+			wg.Done()
+		}(imp)
 	}
-	for _ = range imports {
-		<-done
-	}
+	wg.Wait()
 }
 
 func getImportsFromFile(dir, file string) []Import {
@@ -84,10 +96,7 @@ func getImportsFromFile(dir, file string) []Import {
 	return ret
 }
 
-func get(imp Import, done chan struct{}) {
-	defer func() {
-		done <- struct{}{}
-	}()
+func getDependencies(imp Import) {
 	vcspath := filepath.Join(goPathSrc,
 		strings.TrimRight(imp.Package, "/..."))
 	if !exists(vcspath) {
@@ -101,6 +110,11 @@ func get(imp Import, done chan struct{}) {
 			return
 		}
 	}
+}
+
+func get(imp Import) {
+	vcspath := filepath.Join(goPathSrc,
+		strings.TrimRight(imp.Package, "/..."))
 	v, err := vcs.New(vcspath, goPathSrc)
 	if err != nil {
 		elog.Print(err)
