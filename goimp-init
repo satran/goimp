@@ -1,4 +1,7 @@
-# This file must not be executed rather sourced.
+#!/bin/sh
+set -e
+
+cd $(realpath .)
 
 # Remove any trailing slashes
 GOPATH=${GOPATH%/} 
@@ -7,31 +10,30 @@ export OLD_WD=$(pwd)
 export OLD_GOPATH=$GOPATH
 
 TMP=$(mktemp -d)
-VENDOR=vendor.img
-
-# Create a new image if it does not exist
-if [ ! -f $VENDOR ];
-then
-    dd if=/dev/zero of=$VENDOR bs=1M count=1 seek=254
-    mkfs.ext4 $VENDOR
-fi
-
-sudo mount $VENDOR $TMP
+[[ -e "vendor.tar" ]] && tar -xf vendor.tar -C "$TMP"
 
 echo "setting GOPATH to $TMP"
 PKG=${PWD/#"${GOPATH}"/}
 PKGPATH=$TMP/$PKG
-sudo mkdir -p $PKGPATH
-sudo chown -R $USER $TMP 
-sudo mount --bind $PWD $PKGPATH
+mkdir -p $(dirname $PKGPATH)
+[[ -e "$PKGPATH" ]] || ln -s "$PWD" "$PKGPATH"
 export GOPATH=$TMP
 cd $PKGPATH
 
+(set +e; goimp get)
+if [ -z "$PS1" ]; then
+	export PS1="[go] $(basename $PKGPATH)=> "
+else
+	export PS1="[go] $PS1"
+fi
+$SHELL
+
 function cleanup {
-    echo "unmounting..."
+    set +e
+    rm "$PKGPATH"
     cd $OLD_WD
-    sudo umount $PKGPATH
-    sudo umount $TMP
+    tar -cf vendor.tar -C "$TMP" .
+    rm -fr "$TMP"
 }
 
 trap "cleanup" EXIT
