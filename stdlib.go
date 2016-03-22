@@ -9,7 +9,7 @@ var isStdLib func(path string) bool
 func init() {
 	builtins := newSet()
 	for _, path := range []string{
-		"archive", "bufio", "builtin", "bytes", "compress", "container",
+		"C", "archive", "bufio", "builtin", "bytes", "compress", "container",
 		"crypto", "database", "debug", "encoding", "errors", "expvar",
 		"flag", "fmt", "go", "hash", "html", "image", "index", "io",
 		"log", "math", "mime", "net", "os", "path", "reflect", "regexp",

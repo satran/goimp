@@ -71,7 +71,7 @@ func runList(cmd *Command, args []string) {
 }
 
 func list(dir string, recursive, hash bool) []Import {
-	imports, err := getPackageImports(*listDir, *listRecursive, nil)
+	imports, err := getPackageImports(*listDir, *listRecursive, newSet())
 	if err != nil {
 		elog.Fatal(err)
 	}
@@ -139,7 +139,8 @@ func getPackageImports(dir string, recursive bool, initial *set) ([]string, erro
 		return nil, err
 	}
 	for _, file := range files {
-		imports.Extend(importsForFile(file))
+		imps := importsForFile(file)
+		imports.Extend(imps...)
 	}
 	if !recursive {
 		return imports.Export(), nil
@@ -154,7 +155,8 @@ func getPackageImports(dir string, recursive bool, initial *set) ([]string, erro
 			continue
 		}
 		path := filepath.Join(goPathSrc, imp)
-		pathImports, err := getPackageImports(path, recursive, imports)
+		pathImports, err := getPackageImports(path, recursive,
+			newSet().Extend(imports.Export()...).Extend(initial.Export()...))
 		switch err.(type) {
 		case *errPkgNotFound:
 			elog.Print(err)
@@ -162,7 +164,7 @@ func getPackageImports(dir string, recursive bool, initial *set) ([]string, erro
 		default:
 			return nil, err
 		}
-		imports.Extend(pathImports)
+		imports.Extend(pathImports...)
 	}
 	return imports.Export(), nil
 }

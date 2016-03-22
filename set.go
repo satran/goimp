@@ -32,8 +32,9 @@ func (s *set) Contains(elem string) bool {
 }
 
 // Extend accepts a slice of elements and updates the Set with them
-func (s *set) Extend(elems []string) {
+func (s *set) Extend(elems ...string) *set {
 	for _, imp := range elems {
 		s.Add(imp)
 	}
+	return s
 }
