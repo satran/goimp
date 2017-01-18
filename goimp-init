@@ -1,39 +1,24 @@
 #!/bin/sh
 set -e
 
-cd $(realpath .)
-
-# Remove any trailing slashes
-GOPATH=${GOPATH%/} 
-
-export OLD_WD=$(pwd)
 export OLD_GOPATH=$GOPATH
 
-TMP=$(mktemp -d)
-[[ -e "vendor.tar" ]] && tar -xf vendor.tar -C "$TMP"
-
-echo "setting GOPATH to $TMP"
-PKG=${PWD/#"${GOPATH}"/}
-PKGPATH=$TMP/$PKG
-mkdir -p $(dirname $PKGPATH)
-[[ -e "$PKGPATH" ]] || ln -s "$PWD" "$PKGPATH"
-export GOPATH=$TMP
-cd $PKGPATH
-
-(set +e; goimp get)
-if [ -z "$PS1" ]; then
-	export PS1="[go] $(basename $PKGPATH)=> "
-else
-	export PS1="[go] $PS1"
-fi
-$SHELL
+NEW_GOPATH=$(mktemp -d)
+[[ -e "vendor.tar" ]] && tar -xf vendor.tar -C "$NEW_GOPATH"
+export GOPATH="$NEW_GOPATH:$GOPATH"
 
 function cleanup {
     set +e
-    rm "$PKGPATH"
-    cd $OLD_WD
-    tar -cf vendor.tar -C "$TMP" .
-    rm -fr "$TMP"
+    tar -cf vendor.tar -C "$NEW_GOPATH" .
+    rm -fr "$NEW_GOPATH"
 }
-
 trap "cleanup" EXIT
+
+(set +e; goimp get)
+if [ -z "$PS1" ]; then
+    export PS1="[go] $(basename $(pwd))=> "
+else
+    export PS1="[go] $PS1"
+fi
+$SHELL
+
